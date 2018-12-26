@@ -1,14 +1,6 @@
-
-# coding: utf-8
-
-# In[ ]:
-
 from itertools import zip_longest
 import sys
 from collections import defaultdict
-
-
-# In[ ]:
 
 def grouper(iterable, n, fillvalue=None):
     "Collect data into fixed-length chunks or blocks"
@@ -18,19 +10,8 @@ def grouper(iterable, n, fillvalue=None):
 
 lmap = lambda fn, x: list(map(fn, x))
 
-
-# In[ ]:
-
 code = open("challenge.bin", "rb").read()
 code = [n1+n2*256 for n1, n2 in grouper(code, 2)]
-
-
-# In[ ]:
-
-code[:10]
-
-
-# In[ ]:
 
 REG_OFFSET = 32768
 regs = {v: 0 for v in range(8)}
@@ -148,14 +129,8 @@ insts = {0: halt, 1: _set,
          20: _in,
          21: noop}
 
-
-# In[ ]:
-
 s = 'hlt: 0\nset: 1 a b\npush: 2 a\npop: 3 a\neq: 4 a b c\ngt: 5 a b c\njmp: 6 a\njt: 7 a b\njf: 8 a b\nadd: 9 a b c\nmult: 10 a b c\nmod: 11 a b c\nand: 12 a b c\nor: 13 a b c\nnot: 14 a b\nrmem: 15 a b\nwmem: 16 a b\ncall: 17 a\nret: 18\nout: 19 a\nin: 20 a\nnoop: 21'
 code_takes = {int(l[1]): len(l)-2 for l in lmap(str.split, s.split("\n"))}
-
-
-# In[ ]:
 
 program = []
 left = 0
@@ -166,9 +141,6 @@ for c in code:
     else:
         program.append([c])
         left = code_takes.get(c, 0)
-
-
-# In[ ]:
 
 ip = 0
 stack = []
@@ -195,19 +167,3 @@ def exec():
             res = fn(*args)
         ip += 1
 exec()
-
-
-# In[ ]:
-
-' '.join(map(str, code[527:540]))
-
-
-# In[ ]:
-
-mem
-
-
-# In[ ]:
-
-
-
