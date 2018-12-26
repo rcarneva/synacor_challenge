@@ -1,6 +1,6 @@
 from itertools import zip_longest
 import sys
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 def grouper(iterable, n, fillvalue=None):
     "Collect data into fixed-length chunks or blocks"
@@ -144,14 +144,20 @@ stack = []
 regs = {v: 0 for v in range(8)}
 mem = defaultdict(int, {i: v for i, v in enumerate(code)})
 
-def exec():
+mem[5489] = 6
+mem[5490] = 5498
+
+def run():
     global ip
     left = 0
     res = None
+    execs = 0
+    cc = Counter()
     while res != "HALT":
         c = mem[ip]
         if left == 0:
             fn = insts[c]
+            cc[ip] += 1
             cmd = c
             left = code_takes[c]
             args = []
@@ -161,4 +167,10 @@ def exec():
         if left == 0:
             res = fn(*args)
         ip += 1
-exec()
+        execs += 1
+        if execs % 1000000 == 0:
+            print(cc.most_common(10), flush=True)
+            print('{} {} {} {}'.format(cc[521], cc[5451], cc[5522], cc[6042]))
+    print(cc.most_common(10), flush=True)
+    print('{} {} {} {}'.format(cc[521], cc[5451], cc[5522], cc[6042]))
+run()
