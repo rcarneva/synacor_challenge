@@ -15,9 +15,13 @@ code = [n1+n2*256 for n1, n2 in grouper(code, 2)]
 
 REG_OFFSET = 32768
 regs = {v: 0 for v in range(8)}
+
+reg8 = int(sys.argv[1]) if len(sys.argv) >= 2 else 0
+
 mem = defaultdict(int, {i: v for i, v in enumerate(code)})
 
 inputbuffer = []
+
 
 def deref(a):
     return a if a < REG_OFFSET else regs[a-REG_OFFSET]
@@ -39,7 +43,11 @@ def gt(a, b, c):
 
 def add(a, b, c):
     global regs
-    regs[a-REG_OFFSET] = (deref(b) + deref(c)) % REG_OFFSET
+    try:
+        regs[a-REG_OFFSET] = (deref(b) + deref(c)) % REG_OFFSET
+    except TypeError as e:
+        print(ip, a, b, c, REG_OFFSET, list(map(type, [a,b,c])))
+        raise e
 
 def mult(a, b, c):
     global regs
@@ -81,7 +89,7 @@ def jf(a, b):
 def push(a):
     global stack
     stack.append(deref(a))
-    
+
 def pop(a):
     global stack
     regs[a-REG_OFFSET] = stack.pop()
@@ -94,36 +102,47 @@ def call(a):
 def ret():
     global stack, ip
     ip = stack.pop()-1
-    
+
 def rmem(a, b):
     global mem
     regs[a-REG_OFFSET] = mem[deref(b)]
-    
+
 def wmem(a, b):
     global mem
     mem[deref(a)] = deref(b)
 
+inhistory = []
+
 def _in(a):
-    global inputbuffer
+    global inputbuffer, regs
+    regs[7] = reg8
+    shorts = {'n': 'north', 's': 'south', 'e': 'east', 'w': 'west'}
     if len(inputbuffer) == 0:
         i = input()
+        if i == "quit":
+            print("-"*120)
+            print('\n'.join(inhistory))
+            exit()
+        if i in shorts:
+            i = shorts[i]
+        inhistory.append(i)
         for c in i:
             inputbuffer.append(c)
         inputbuffer.append("\n")
     regs[a-REG_OFFSET] = ord(inputbuffer.pop(0))
-     
+
 def noop():
     pass
 
 def not_impl(*args):
     print("{}".format(args), file=sys.stderr, end=" ")
 
-insts = {0: halt, 1: _set, 
-         2: push, 3: pop, 
-         4: eq, 5: gt, 
-         6: jmp, 7: jt, 8: jf, 
-         9: add, 10: mult, 11: mod, 
-         12: _and, 13: _or, 14: _not, 
+insts = {0: halt, 1: _set,
+         2: push, 3: pop,
+         4: eq, 5: gt,
+         6: jmp, 7: jt, 8: jf,
+         9: add, 10: mult, 11: mod,
+         12: _and, 13: _or, 14: _not,
          15: rmem, 16: wmem,
          17: call, 18: ret, 19: out,
          20: _in,
