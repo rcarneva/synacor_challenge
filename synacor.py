@@ -16,7 +16,7 @@ code = [n1+n2*256 for n1, n2 in grouper(code, 2)]
 REG_OFFSET = 32768
 regs = {v: 0 for v in range(8)}
 
-reg8 = int(sys.argv[1]) if len(sys.argv) >= 2 else 0
+reg8 = int(sys.argv[1]) if len(sys.argv) >= 2 else 0 # 25734
 
 mem = defaultdict(int, {i: v for i, v in enumerate(code)})
 
@@ -122,7 +122,7 @@ def _in(a):
         if i == "quit":
             print("-"*120)
             print('\n'.join(inhistory))
-            exit()
+            return "HALT"
         i = shorts[i] if i in shorts else i
         inhistory.append(i)
         for c in i:
@@ -142,10 +142,13 @@ code_takes = {int(l[1]): len(l)-2 for l in lmap(str.split, s.split("\n"))}
 ip = 0
 stack = []
 regs = {v: 0 for v in range(8)}
-mem = defaultdict(int, {i: v for i, v in enumerate(code)})
 
-mem[5489] = 6
-mem[5490] = 5498
+# bypass check
+code[5489:5492] = [1, REG_OFFSET, 6]
+code[5492:5495] = [1, REG_OFFSET+1, 5]
+code[5495:5498] = [1, REG_OFFSET+7, 25734]
+
+mem = defaultdict(int, {i: v for i, v in enumerate(code)})
 
 def run():
     global ip
@@ -168,9 +171,4 @@ def run():
             res = fn(*args)
         ip += 1
         execs += 1
-        if execs % 1000000 == 0:
-            print(cc.most_common(10), flush=True)
-            print('{} {} {} {}'.format(cc[521], cc[5451], cc[5522], cc[6042]))
-    print(cc.most_common(10), flush=True)
-    print('{} {} {} {}'.format(cc[521], cc[5451], cc[5522], cc[6042]))
 run()
