@@ -23,7 +23,6 @@ mem = defaultdict(int, {i: v for i, v in enumerate(code)})
 inputbuffer = []
 inputbuffer = list(open("input_script").read())
 
-
 def deref(a):
     return a if a < REG_OFFSET else regs[a-REG_OFFSET]
 
@@ -143,16 +142,6 @@ insts = {0: halt, 1: _set, 2: push, 3: pop, 4: eq, 5: gt, 6: jmp, 7: jt, 8: jf, 
 
 s = 'hlt: 0\nset: 1 a b\npush: 2 a\npop: 3 a\neq: 4 a b c\ngt: 5 a b c\njmp: 6 a\njt: 7 a b\njf: 8 a b\nadd: 9 a b c\nmult: 10 a b c\nmod: 11 a b c\nand: 12 a b c\nor: 13 a b c\nnot: 14 a b\nrmem: 15 a b\nwmem: 16 a b\ncall: 17 a\nret: 18\nout: 19 a\nin: 20 a\nnoop: 21'
 code_takes = {int(l[1]): len(l)-2 for l in lmap(str.split, s.split("\n"))}
-
-program = []
-left = 0
-for c in code:
-    if left > 0:
-        program[-1].append(c)
-        left -= 1
-    else:
-        program.append([c])
-        left = code_takes.get(c, 0)
 
 ip = 0
 stack = []
