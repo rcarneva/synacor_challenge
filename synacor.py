@@ -21,6 +21,7 @@ reg8 = int(sys.argv[1]) if len(sys.argv) >= 2 else 0
 mem = defaultdict(int, {i: v for i, v in enumerate(code)})
 
 inputbuffer = []
+inputbuffer = list(open("input_script").read())
 
 
 def deref(a):
@@ -70,7 +71,7 @@ def _not(a, b):
     regs[a-REG_OFFSET] = ~deref(b) & 0x7FFF
 
 def out(a):
-    print(chr(deref(a)), end="")
+    print(chr(deref(a)), end="", flush=True)
 
 def jmp(a):
     global ip
@@ -137,16 +138,8 @@ def noop():
 def not_impl(*args):
     print("{}".format(args), file=sys.stderr, end=" ")
 
-insts = {0: halt, 1: _set,
-         2: push, 3: pop,
-         4: eq, 5: gt,
-         6: jmp, 7: jt, 8: jf,
-         9: add, 10: mult, 11: mod,
-         12: _and, 13: _or, 14: _not,
-         15: rmem, 16: wmem,
-         17: call, 18: ret, 19: out,
-         20: _in,
-         21: noop}
+insts = {0: halt, 1: _set, 2: push, 3: pop, 4: eq, 5: gt, 6: jmp, 7: jt, 8: jf, 9: add, 10: mult, 11: mod,
+         12: _and, 13: _or, 14: _not, 15: rmem, 16: wmem, 17: call, 18: ret, 19: out, 20: _in, 21: noop}
 
 s = 'hlt: 0\nset: 1 a b\npush: 2 a\npop: 3 a\neq: 4 a b c\ngt: 5 a b c\njmp: 6 a\njt: 7 a b\njf: 8 a b\nadd: 9 a b c\nmult: 10 a b c\nmod: 11 a b c\nand: 12 a b c\nor: 13 a b c\nnot: 14 a b\nrmem: 15 a b\nwmem: 16 a b\ncall: 17 a\nret: 18\nout: 19 a\nin: 20 a\nnoop: 21'
 code_takes = {int(l[1]): len(l)-2 for l in lmap(str.split, s.split("\n"))}
