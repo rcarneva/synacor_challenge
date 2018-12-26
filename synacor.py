@@ -123,8 +123,7 @@ def _in(a):
             print("-"*120)
             print('\n'.join(inhistory))
             exit()
-        if i in shorts:
-            i = shorts[i]
+        i = shorts[i] if i in shorts else i
         inhistory.append(i)
         for c in i:
             inputbuffer.append(c)
@@ -133,9 +132,6 @@ def _in(a):
 
 def noop():
     pass
-
-def not_impl(*args):
-    print("{}".format(args), file=sys.stderr, end=" ")
 
 insts = {0: halt, 1: _set, 2: push, 3: pop, 4: eq, 5: gt, 6: jmp, 7: jt, 8: jf, 9: add, 10: mult, 11: mod,
          12: _and, 13: _or, 14: _not, 15: rmem, 16: wmem, 17: call, 18: ret, 19: out, 20: _in, 21: noop}
@@ -155,12 +151,10 @@ def exec():
     while res != "HALT":
         c = mem[ip]
         if left == 0:
-            fn = insts.get(c, not_impl)
+            fn = insts[c]
             cmd = c
             left = code_takes[c]
             args = []
-            if fn == not_impl:
-                args.append(c)
         else:
             args.append(c)
             left -= 1
